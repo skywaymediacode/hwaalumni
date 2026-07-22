@@ -42,7 +42,14 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @hwa/db migrate
-      - run: pnpm check
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Unit and PostgreSQL integration tests
+        run: pnpm test
+      - name: Production build
+        run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
       - run: pnpm audit --prod --audit-level high

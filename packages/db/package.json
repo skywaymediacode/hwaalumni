@@ -11,7 +11,7 @@
     "email:dispatch": "tsx src/dispatch-email.ts",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --reporter=default --reporter=github-actions"
   },
   "dependencies": {
     "@hwa/auth": "workspace:*",
