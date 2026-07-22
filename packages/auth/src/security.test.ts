@@ -3,6 +3,7 @@ import * as OTPAuth from "otpauth";
 import { createCsrfPair, isTrustedOrigin, verifyCsrf } from "./csrf";
 import { ConsoleEmailAdapter } from "./email";
 import { decryptValue, encryptValue } from "./encryption";
+import { parseAuthEnvironment } from "./environment";
 import { hashPassword, passwordHashNeedsUpgrade, verifyPassword } from "./password";
 import { MemoryRateLimiter } from "./rate-limit";
 import { createOpaqueToken, hashOpaqueToken } from "./tokens";
@@ -80,5 +81,26 @@ describe("safe development email", () => {
     const entry = write.mock.calls[0]?.[0];
     expect(JSON.stringify(entry)).not.toContain("token=secret");
     expect(entry?.text).toContain("redacted");
+  });
+});
+
+describe("production environment validation", () => {
+  const base = {
+    APP_ENV: "production",
+    NEXT_PUBLIC_APP_URL: "https://connect.example.test",
+    DATABASE_URL: "postgresql://user:pass@db.example.test/hwa",
+    SESSION_SECRET: "s".repeat(32),
+    TOTP_ENCRYPTION_KEY: Buffer.alloc(32, 1).toString("base64"),
+    OUTBOX_ENCRYPTION_KEY: Buffer.alloc(32, 2).toString("base64"),
+    EMAIL_FROM: "HWA Connect <admin@example.test>",
+    EMAIL_DELIVERY_MODE: "provider"
+  };
+
+  it("requires a production SMTP endpoint", () => {
+    expect(() => parseAuthEnvironment(base)).toThrow(/SMTP_HOST/u);
+  });
+
+  it("accepts a complete provider-neutral SMTP configuration", () => {
+    expect(parseAuthEnvironment({ ...base, SMTP_HOST: "smtp.example.test", SMTP_PORT: "587", SMTP_SECURE: "false" })).toMatchObject({ SMTP_PORT: 587, SMTP_SECURE: "false" });
   });
 });

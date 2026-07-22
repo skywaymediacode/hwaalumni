@@ -8,6 +8,7 @@
     "generate": "drizzle-kit generate",
     "migrate": "drizzle-kit migrate",
     "bootstrap:admin": "tsx src/bootstrap-admin.ts",
+    "email:dispatch": "tsx src/dispatch-email.ts",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"

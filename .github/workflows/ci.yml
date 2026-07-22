@@ -2,13 +2,36 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, milestone-1-auth-approval]
 permissions:
   contents: read
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: hwa
+          POSTGRES_PASSWORD: hwa_test_password
+          POSTGRES_DB: hwa_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U hwa -d hwa_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      APP_ENV: test
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      DATABASE_URL: postgresql://hwa:hwa_test_password@localhost:5432/hwa_test
+      SESSION_SECRET: ci-only-session-secret-at-least-32-characters
+      TOTP_ENCRYPTION_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      OUTBOX_ENCRYPTION_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      EMAIL_FROM: HWA Connect <admin@example.test>
+      EMAIL_DELIVERY_MODE: log
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -18,5 +41,8 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @hwa/db migrate
       - run: pnpm check
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
       - run: pnpm audit --prod --audit-level high
