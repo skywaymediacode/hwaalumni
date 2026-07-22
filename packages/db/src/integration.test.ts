@@ -176,11 +176,11 @@ describe.runIf(integrationEnabled)("PostgreSQL identity workflows", () => {
     expect(credential?.passwordHash).toBe("replacement-password-hash");
     expect(reset?.usedAt).toBeInstanceOf(Date);
     expect(memberSessions.every(({ revokedAt }) => revokedAt !== null)).toBe(true);
-    const claimed = await claimEmailJobs(database().db, 10, new Date("2026-07-22T12:06:00Z"));
+    const claimed = await claimEmailJobs(database().db, 10, new Date("2030-07-22T12:06:00Z"));
     const resetEmail = claimed.find(({ template }) => template === "password-reset");
     expect(resetEmail?.attempts).toBe(1);
     if (!resetEmail) throw new Error("Password-reset outbox job was not claimed.");
-    await markEmailSent(database().db, resetEmail.id, new Date("2026-07-22T12:07:00Z"));
+    await markEmailSent(database().db, resetEmail.id, new Date("2030-07-22T12:07:00Z"));
     const [sentEmail] = await database().db.select().from(emailOutbox).where(eq(emailOutbox.id, resetEmail.id));
     expect(sentEmail?.status).toBe("sent");
   });
