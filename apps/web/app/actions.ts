@@ -28,12 +28,14 @@ import {
   issuePasswordReset,
   recordLoginHistory,
   revokeAllUserSessions,
+  revokeOwnedSession,
   revokeSession,
   submitRosterRegistration
 } from "@hwa/db";
 import { genericRegistrationResponse, matchesBrandDate, normalizeEmail, safeInternalRedirect } from "@hwa/domain";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { assertTrustedMutationOrigin, keyedHash, readSession, requestMetadata } from "../lib/server/request";
 import { getRuntime } from "../lib/server/runtime";
@@ -289,7 +291,7 @@ export async function verifyAdministratorSecondFactor(_state: FormState, formDat
   try {
     await assertTrustedMutationOrigin();
     const session = await readSession();
-    if (!session || session.role !== "super-admin" || session.state !== "active" || session.assurance !== "password") {
+    if (!session || session.role !== "super-admin" || session.state !== "active") {
       return error("Sign in again to continue.");
     }
     const { database, environment, totpEncryptionKey } = getRuntime();
@@ -400,4 +402,14 @@ export async function logoutAllDevices(): Promise<void> {
     await clearSessionCookie();
   }
   redirect("/login");
+}
+
+export async function revokeDeviceSession(formData: FormData): Promise<void> {
+  await assertTrustedMutationOrigin();
+  const session = await readSession();
+  if (!session) redirect("/login");
+  const targetSessionId = field(formData, "sessionId");
+  if (!z.uuid().safeParse(targetSessionId).success || targetSessionId === session.sessionId) return;
+  await revokeOwnedSession(getRuntime().database.db, session.userId, targetSessionId, "user-device-revoked");
+  revalidatePath("/profile");
 }

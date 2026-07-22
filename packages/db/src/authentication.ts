@@ -236,6 +236,13 @@ export async function revokeSession(db: Database, sessionId: string, reason: str
     .where(and(eq(sessions.id, sessionId), isNull(sessions.revokedAt)));
 }
 
+export async function revokeOwnedSession(db: Database, userId: string, sessionId: string, reason: string, now = new Date()): Promise<boolean> {
+  const updated = await db.update(sessions).set({ revokedAt: now, revocationReason: reason, updatedAt: now })
+    .where(and(eq(sessions.id, sessionId), eq(sessions.userId, userId), isNull(sessions.revokedAt)))
+    .returning({ id: sessions.id });
+  return updated.length === 1;
+}
+
 export async function revokeAllUserSessions(db: Database, userId: string, reason: string, now = new Date()): Promise<void> {
   await db.update(sessions).set({ revokedAt: now, revocationReason: reason, updatedAt: now })
     .where(and(eq(sessions.userId, userId), isNull(sessions.revokedAt)));

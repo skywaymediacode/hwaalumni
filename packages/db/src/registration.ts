@@ -1,4 +1,4 @@
-import { assertValidClassProfile, can, genericRegistrationResponse, normalizeEmail, normalizeFullName, type Actor, type Badge } from "@hwa/domain";
+import { assertValidClassProfile, genericRegistrationResponse, normalizeEmail, normalizeFullName, type Badge } from "@hwa/domain";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import type { Database } from "./connection";
 import {
@@ -9,9 +9,9 @@ import {
   registrationRequests,
   rosterEntries,
   sessions,
-  totpFactors,
   users
 } from "./schema";
+import { assertAdministrativeSession } from "./administration";
 
 export interface RegistrationInput {
   fullName: string;
@@ -73,35 +73,12 @@ export interface ApprovalInput extends ReviewInput {
 }
 
 async function assertReviewer(tx: Parameters<Parameters<Database["transaction"]>[0]>[0], input: ReviewInput, now: Date): Promise<void> {
-  const [reviewer] = await tx.select({
-    user: users,
-    session: sessions,
-    factor: totpFactors
-  }).from(users)
-    .innerJoin(sessions, and(eq(sessions.id, input.reviewerSessionId), eq(sessions.userId, users.id)))
-    .innerJoin(totpFactors, eq(totpFactors.userId, users.id))
-    .where(and(eq(users.id, input.reviewerUserId), isNull(sessions.revokedAt)))
-    .limit(1)
-    .for("update");
-
-  if (!reviewer || reviewer.session.absoluteExpiresAt <= now || reviewer.session.idleExpiresAt <= now || reviewer.factor.verifiedAt === null) {
-    throw new Error("Registration review is not authorized.");
-  }
-
-  const actor: Actor = {
-    id: reviewer.user.id,
-    role: reviewer.user.role,
-    state: reviewer.user.state,
-    badge: reviewer.user.badge ?? "spouse",
-    classYear: reviewer.user.graduationYear,
-    assignedClassYears: [],
-    isRegistrationReviewer: reviewer.user.isRegistrationReviewer,
-    hasTwoFactor: true,
-    totpVerifiedAt: reviewer.session.totpVerifiedAt
-  };
-  if (reviewer.session.assurance !== "mfa" || !can(actor, "registration:review", undefined, now)) {
-    throw new Error("Registration review is not authorized.");
-  }
+  await assertAdministrativeSession(tx, {
+    administratorUserId: input.reviewerUserId,
+    administratorSessionId: input.reviewerSessionId,
+    capability: "registration:review",
+    now
+  });
 }
 
 export async function approveRegistration(db: Database, input: ApprovalInput): Promise<void> {

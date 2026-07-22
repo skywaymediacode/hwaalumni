@@ -101,6 +101,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@hwa/auth':
+        specifier: workspace:*
+        version: link:../auth
       '@hwa/domain':
         specifier: workspace:*
         version: link:../domain

@@ -3,7 +3,7 @@ import "server-only";
 import { createHmac } from "node:crypto";
 import { hashOpaqueToken, isTrustedOrigin, sessionCookieName } from "@hwa/auth";
 import { findActiveSession, touchSession, type SessionAccount } from "@hwa/db";
-import type { Actor } from "@hwa/domain";
+import { can, type Actor } from "@hwa/domain";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getRuntime } from "./runtime";
@@ -86,5 +86,6 @@ export async function requireAdministrator(): Promise<SessionAccount> {
   const session = await requireActiveSession();
   const actor = toActor(session);
   if (!actor || actor.role !== "super-admin" || session.assurance !== "mfa") redirect("/home");
+  if (!can(actor, "admin:enter")) redirect("/login/verify-2fa");
   return session;
 }

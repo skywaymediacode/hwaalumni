@@ -7,11 +7,13 @@
   "scripts": {
     "generate": "drizzle-kit generate",
     "migrate": "drizzle-kit migrate",
+    "bootstrap:admin": "tsx src/bootstrap-admin.ts",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
+    "@hwa/auth": "workspace:*",
     "@hwa/domain": "workspace:*",
     "csv-parse": "7.0.1",
     "drizzle-orm": "0.45.2",
