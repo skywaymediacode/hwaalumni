@@ -1,4 +1,4 @@
-export const accountStates = ["roster-only", "pending", "active", "suspended", "deactivated", "soft-deleted"] as const;
+export const accountStates = ["roster-only", "pending", "active", "rejected", "suspended", "deactivated", "soft-deleted"] as const;
 export type AccountState = (typeof accountStates)[number];
 export type Role = "member" | "super-admin";
 export type Badge = "two-year" | "four-year" | "spouse";
@@ -12,6 +12,7 @@ export interface Actor {
   assignedClassYears: readonly number[];
   isRegistrationReviewer: boolean;
   hasTwoFactor: boolean;
+  totpVerifiedAt: Date | null;
 }
 
 export type Capability =
@@ -21,9 +22,20 @@ export type Capability =
   | "channel:manage"
   | "class-group:read"
   | "registration:review"
-  | "admin:enter";
+  | "admin:enter"
+  | "roster:import"
+  | "user:manage"
+  | "audit:read";
 
-export function can(actor: Actor, capability: Capability, resourceClassYear?: number): boolean {
+export const recentTotpWindowMs = 10 * 60 * 1000;
+
+export function hasRecentTotpVerification(actor: Actor, now = new Date()): boolean {
+  if (!actor.hasTwoFactor || actor.totpVerifiedAt === null) return false;
+  const age = now.getTime() - actor.totpVerifiedAt.getTime();
+  return age >= 0 && age <= recentTotpWindowMs;
+}
+
+export function can(actor: Actor, capability: Capability, resourceClassYear?: number, now = new Date()): boolean {
   if (actor.state !== "active") return false;
   switch (capability) {
     case "community:read":
@@ -33,9 +45,12 @@ export function can(actor: Actor, capability: Capability, resourceClassYear?: nu
     case "channel:manage":
       return actor.role === "super-admin" && actor.hasTwoFactor;
     case "admin:enter":
-      return actor.role === "super-admin" && actor.hasTwoFactor;
+    case "roster:import":
+    case "user:manage":
+    case "audit:read":
+      return actor.role === "super-admin" && hasRecentTotpVerification(actor, now);
     case "registration:review":
-      return actor.role === "super-admin" && actor.hasTwoFactor && actor.isRegistrationReviewer;
+      return actor.role === "super-admin" && actor.isRegistrationReviewer && hasRecentTotpVerification(actor, now);
     case "class-group:read":
       if (actor.role === "super-admin") return actor.hasTwoFactor;
       return actor.badge !== "spouse" && resourceClassYear !== undefined && actor.assignedClassYears.includes(resourceClassYear);
