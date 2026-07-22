@@ -1,0 +1,20 @@
+{
+  "name": "hwa-connect",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.9.0",
+  "engines": { "node": ">=24.0.0" },
+  "scripts": {
+    "dev": "pnpm --filter @hwa/web dev",
+    "build": "pnpm --filter @hwa/web build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+  },
+  "devDependencies": {
+    "@types/node": "24.3.0",
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
+  }
+}
