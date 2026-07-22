@@ -50,7 +50,20 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
       - name: Unit and PostgreSQL integration tests
-        run: pnpm test
+        shell: bash
+        run: |
+          set +e
+          pnpm test 2>&1 | tee test-output.log
+          status=${PIPESTATUS[0]}
+          set -e
+          if [ "$status" -ne 0 ]; then
+            details=$(tail -n 100 test-output.log)
+            details=${details//'%'/'%25'}
+            details=${details//$'\r'/'%0D'}
+            details=${details//$'\n'/'%0A'}
+            echo "::error title=Test failure::$details"
+            exit "$status"
+          fi
       - name: Production build
         run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
