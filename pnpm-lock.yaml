@@ -24,12 +24,21 @@ importers:
 
   apps/web:
     dependencies:
+      '@hwa/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
+      '@hwa/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@hwa/domain':
         specifier: workspace:*
         version: link:../../packages/domain
       '@hwa/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      drizzle-orm:
+        specifier: 0.45.2
+        version: 0.45.2(@types/pg@8.20.0)(pg@8.22.0)
       next:
         specifier: 16.2.11
         version: 16.2.11(@babel/core@7.29.7)(@types/node@24.3.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -39,6 +48,9 @@ importers:
       react-dom:
         specifier: 19.2.7
         version: 19.2.7(react@19.2.7)
+      zod:
+        specifier: 4.4.3
+        version: 4.4.3
     devDependencies:
       '@types/node':
         specifier: 24.3.0

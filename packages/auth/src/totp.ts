@@ -20,7 +20,11 @@ function createTotp(secret: string, label: string): OTPAuth.TOTP {
 
 export function createTotpEnrollment(label: string): TotpEnrollment {
   const secret = new OTPAuth.Secret({ size: 20 }).base32;
-  return { secret, uri: createTotp(secret, label).toString() };
+  return { secret, uri: createTotpUri(secret, label) };
+}
+
+export function createTotpUri(secret: string, label: string): string {
+  return createTotp(secret, label).toString();
 }
 
 export function verifyTotp(secret: string, token: string, now = new Date()): boolean {

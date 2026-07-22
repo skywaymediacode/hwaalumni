@@ -2,6 +2,7 @@ node_modules/
 .pnpm-store/
 .next/
 coverage/
+*.tsbuildinfo
 *.log
 .env
 .env.local

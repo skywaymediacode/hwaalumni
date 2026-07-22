@@ -11,11 +11,15 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@hwa/auth": "workspace:*",
+    "@hwa/db": "workspace:*",
     "@hwa/domain": "workspace:*",
     "@hwa/ui": "workspace:*",
+    "drizzle-orm": "0.45.2",
     "next": "16.2.11",
     "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "react-dom": "19.2.7",
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@types/node": "24.3.0",
