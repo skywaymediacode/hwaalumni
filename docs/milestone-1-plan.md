@@ -18,7 +18,7 @@ Milestone 1 delivers roster-matched registration, approval/rejection, password l
    - Add environment validation, Argon2id password services, opaque session rotation/revocation, password resets, TOTP encryption/verification, recovery codes, CSRF, throttling, safe logging, and email adapters.
 5. **Public experience**
    - Move the design preview to `/home`.
-   - Build the permanent briefcase date ritual at `/`, then login, registration, forgot/reset password, and pending pages.
+   - Redirect `/` directly to sign-in, then build registration, forgot/reset password, and pending pages.
 6. **Protected member experience**
    - Enforce active-session authorization on `/home`, `/profile`, and `/directory` using server-side guards.
 7. **Administrator experience**
@@ -28,7 +28,7 @@ Milestone 1 delivers roster-matched registration, approval/rejection, password l
 
 ## Security acceptance checks
 
-- The date ritual reveals public forms only; it never creates identity or authorization state.
+- The root route reaches sign-in without an additional access-key step.
 - Public registration and password-reset responses are indistinguishable for roster/account hits and misses.
 - Pending, rejected, suspended, deactivated, roster-only, and soft-deleted accounts cannot read protected content.
 - Approval is single-winner, transactional, audited, assigns valid class membership, revokes stale sessions, and creates an email outbox job.

@@ -4,7 +4,7 @@
 
 - Build a private alumni community for Herbert W. Armstrong College.
 - Preserve the existing HWA brand system and responsive Milestone 0 dashboard.
-- The root route is a branded briefcase combination-lock ritual using January 16, 1985. The ritual is never authentication and must never expose protected data.
+- The root route sends visitors directly to the public member sign-in page.
 - Alumni authenticate with email and password. Super admins additionally require TOTP.
 - Only active accounts may read protected community content.
 

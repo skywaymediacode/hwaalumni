@@ -1,6 +1,5 @@
 export const sessionCookieName = "__Host-hwa_session";
 export const csrfCookieName = "__Host-hwa_csrf";
-export const gateCookieName = "hwa_gate_ritual";
 export const recoveryDisplayCookieName = "__Host-hwa_recovery_display";
 
 export function sessionCookieOptions(maxAgeSeconds: number) {

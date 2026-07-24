@@ -1,12 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-test("the branded date ritual opens the public sign-in route", async ({ page }) => {
+test("the root route opens the public sign-in page directly", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Some doors open with a shared memory." })).toBeVisible();
-  await page.getByLabel("Combination month").fill("1");
-  await page.getByLabel("Combination day").fill("16");
-  await page.getByLabel("Combination year").fill("1985");
-  await page.getByRole("button", { name: "Turn the key" }).click();
   await expect(page).toHaveURL(/\/login$/u);
   await expect(page.getByRole("heading", { name: "Welcome back." })).toBeVisible();
 });

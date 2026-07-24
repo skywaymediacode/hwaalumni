@@ -5,7 +5,6 @@ import {
   createRecoveryCodes,
   decryptValue,
   encryptValue,
-  gateCookieName,
   hashOpaqueToken,
   hashPassword,
   normalizeRecoveryCode,
@@ -32,7 +31,7 @@ import {
   revokeSession,
   submitRosterRegistration
 } from "@hwa/db";
-import { genericRegistrationResponse, matchesBrandDate, normalizeEmail, safeInternalRedirect } from "@hwa/domain";
+import { genericRegistrationResponse, normalizeEmail, safeInternalRedirect } from "@hwa/domain";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -96,44 +95,6 @@ async function startSession(input: {
     now
   });
   await setSessionCookie(token.token);
-}
-
-export async function unlockGate(_state: FormState, formData: FormData): Promise<FormState> {
-  try {
-    await assertTrustedMutationOrigin();
-    const { database, environment } = getRuntime();
-    const metadata = await requestMetadata();
-    const keyHash = keyedHash("gate", metadata.ipHash ?? "anonymous", environment.SESSION_SECRET);
-    const decision = await consumeRateLimit(database.db, {
-      bucket: "date-gate",
-      keyHash,
-      maxAttempts: 8,
-      windowMs: 15 * 60 * 1000,
-      baseBlockMs: 60_000,
-      maxBlockMs: 60 * 60 * 1000
-    });
-    if (!decision.allowed) return error(`Please wait ${decision.retryAfterSeconds} seconds before trying again.`);
-
-    const month = Number.parseInt(field(formData, "month"), 10);
-    const day = Number.parseInt(field(formData, "day"), 10);
-    const year = Number.parseInt(field(formData, "year"), 10);
-    if (!matchesBrandDate(month, day, year)) return error("That combination did not open the case.");
-
-    await clearRateLimit(database.db, "date-gate", keyHash);
-    const expiresAt = Math.floor(Date.now() / 1000) + 24 * 60 * 60;
-    const signature = keyedHash("gate-cookie", String(expiresAt), environment.SESSION_SECRET);
-    const cookieStore = await cookies();
-    cookieStore.set(gateCookieName, `${expiresAt}.${signature}`, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      path: "/",
-      maxAge: 24 * 60 * 60
-    });
-  } catch {
-    return error("The portal is temporarily unavailable. Please try again shortly.");
-  }
-  redirect("/login");
 }
 
 export async function registerAccount(_state: FormState, formData: FormData): Promise<FormState> {

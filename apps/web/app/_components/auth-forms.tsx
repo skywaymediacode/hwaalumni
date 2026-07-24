@@ -8,7 +8,6 @@ import {
   registerAccount,
   requestPasswordReset,
   resetPassword,
-  unlockGate,
   verifyAdministratorSecondFactor,
   type FormState
 } from "../actions";
@@ -23,22 +22,6 @@ function Notice({ state }: { state: FormState }) {
 function SubmitButton({ idle, pending }: { idle: string; pending: string }) {
   const { pending: isPending } = useFormStatus();
   return <button className="primary submit" type="submit" disabled={isPending}>{isPending ? pending : idle}</button>;
-}
-
-export function GateForm() {
-  const [state, action] = useActionState(unlockGate, initialState);
-  return <form action={action} className="combination-form">
-    <fieldset>
-      <legend>Enter the founding combination</legend>
-      <label><span>Month</span><input name="month" inputMode="numeric" maxLength={2} placeholder="MM" aria-label="Combination month" required /></label>
-      <span className="dial-mark" aria-hidden="true">•</span>
-      <label><span>Day</span><input name="day" inputMode="numeric" maxLength={2} placeholder="DD" aria-label="Combination day" required /></label>
-      <span className="dial-mark" aria-hidden="true">•</span>
-      <label className="year-dial"><span>Year</span><input name="year" inputMode="numeric" maxLength={4} placeholder="YYYY" aria-label="Combination year" required /></label>
-    </fieldset>
-    <Notice state={state} />
-    <SubmitButton idle="Turn the key" pending="Opening…" />
-  </form>;
 }
 
 export function LoginForm({ next = "", resetComplete = false }: { next?: string; resetComplete?: boolean }) {

@@ -27,6 +27,6 @@ Highest-value assets are member identity/contact data, private conversations, cl
 - DMs are excluded from global search.
 - Exact addresses and image GPS metadata are not retained for map display.
 - Analytics are aggregate and do not infer sensitive traits.
-- The date gate is assumed public knowledge and is never a security boundary.
+- Public routes never serve as an authentication or authorization boundary.
 
 Review this model at every milestone and after any provider or data-flow change.

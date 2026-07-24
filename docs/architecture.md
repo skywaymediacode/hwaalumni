@@ -22,5 +22,5 @@ Local, preview, staging, and production use separate credentials and data stores
 1. Node 24 LTS is the production baseline.
 2. Next.js 16.2 and React 19.2 are pinned, including security patches. TypeScript 6 is pinned until the lint ecosystem supports TypeScript 7.
 3. PostgreSQL search with full-text and trigram indexes is the launch search engine.
-4. The signature date gate never sets identity or authorization state.
+4. The root route redirects directly to member sign-in.
 5. No provider SDK may appear in domain policy code.

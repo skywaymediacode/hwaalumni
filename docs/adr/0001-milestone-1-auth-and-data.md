@@ -46,7 +46,7 @@ Define a provider-neutral rate-limit interface. Milestone 1 uses PostgreSQL coun
 - Native Argon2 binaries must be verified in local, CI, and Vercel Linux builds.
 - Database integration tests require PostgreSQL rather than an in-memory SQL approximation.
 - Email delivery remains in log mode until the owner selects a production provider.
-- The application cannot treat middleware, the branded date ritual, or hidden UI as an authorization boundary.
+- The application cannot treat middleware, public routing, or hidden UI as an authorization boundary.
 
 ## Rejected alternatives
 
